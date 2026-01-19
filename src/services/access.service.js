@@ -4,6 +4,7 @@ const crypto = require("node:crypto");
 const KeyTokenService = require("./keyToken.service");
 const { createTokenPair } = require("../auth/authUtils");
 const { getInfoData } = require("../utils");
+const { BadRequestError, ConflictRequestError } = require("../core/error.response");
 const RoleShop = {
   SHOP: "shop",
   ADMIN: "admin",
@@ -14,15 +15,12 @@ const RoleShop = {
 
 class AccessService {
   static singUp = async ({ name, email, password, role }) => {
-    try {
+    // try {
       // step 1: check email exist
       const holderShop = await ShopModel.findOne({ email }).lean();
 
       if (holderShop) {
-        return {
-          code: "23000",
-          message: "Email already registered",
-        };
+        throw new ConflictRequestError('Shop already registered')
       }
       // step 2: hash password
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -74,12 +72,12 @@ class AccessService {
         code: 200,
         metadata: null,
       };
-    } catch (error) {
-      return {
-        code: "xxx",
-        message: error.message,
-      };
-    }
+    // } catch (error) {
+    //   return {
+    //     code: "xxx",
+    //     message: error.message,
+    //   };
+    // }
   };
 }
 module.exports = AccessService;
