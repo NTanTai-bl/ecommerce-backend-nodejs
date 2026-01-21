@@ -72,12 +72,7 @@ class AccessService {
         code: 200,
         metadata: null,
       };
-    // } catch (error) {
-    //   return {
-    //     code: "xxx",
-    //     message: error.message,
-    //   };
-    // }
+
   };
 }
 module.exports = AccessService;
