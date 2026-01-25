@@ -1,39 +1,42 @@
-'use strict'
-
-const statusCode = {
-    OK: 200,
-    CREATE: 201
-}
-
-const reasonStatusCode = {
-        OK: 'SUCCESS',
-        CREATE: 'Create!'
-}
+"use strict";
+const { StatusCodes, ReasonPhrases } = require("../utils/httpStatusCode");
+const reasonPhrases = require("../utils/reasonPhrases");
 class SuccessRespone {
-    constructor({message, statusCode = statusCode.OK, reasonStatusCode = reasonStatusCode.Ok, metaData = {}}){
-        this.message = message? message : reasonStatusCode,
-        this.status = statusCode,
-        this.metaData = metaData
-    }
+  constructor({
+    message,
+    statusCode = StatusCodes.OK,
+    reasonStatusCode = ReasonPhrases.OK,
+    metaData = {},
+  }) {
+    ((this.message = message ? message : reasonStatusCode),
+      (this.status = statusCode),
+      (this.metaData = metaData));
+  }
 
-    send (res, header ={}){
-        return res.status(this.status).json(this)
-    }
+  send(res, header = {}) {
+    return res.status(this.status).json(this);
+  }
 }
 
 class OK extends SuccessRespone {
-    constructor({message, metaData}){
-        super({message,metaData})
-    }
+  constructor({ message, metaData }) {
+    super({ message, metaData });
+  }
 }
 
 class CREATE extends SuccessRespone {
-    constructor({message, statusCode = statusCode.CREATE, reasonStatusCode = reasonStatusCode.CREATE, metaData = {}}){
-        super(message, statusCode, reasonStatusCode, metaData)
-    }
+  constructor({
+    message,
+    statusCode = StatusCodes.CREATED,
+    reasonStatusCode = ReasonPhrases.CREATED,
+    metaData = {},
+  }) {
+    super({ message, statusCode, reasonStatusCode, metaData });
+  }
 }
 
 module.exports = {
-    OK,
-    CREATE
-}
+  OK,
+  CREATE,
+  SuccessRespone,
+};

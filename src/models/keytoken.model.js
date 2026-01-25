@@ -9,7 +9,8 @@ const keyTokenSchema = new Schema(
     user: { type: Schema.Types.ObjectId, ref: "Shop", required: true },
     publicKey: { type: String, required: true },
     privateKey: { type: String, required: true },
-    refreshToken: { type: Array, default: [] },
+    refreshTokensUsed: { type: Array, default: [] },
+    refreshToken: {type: String, require: true},
   },
   {
     timestamps: true,
