@@ -60,15 +60,24 @@ const authentication = asyncHandler(async (req, res, next) => {
 
   const accessToken = req.headers[HEADER.AUTHORIZATION];
   if (!accessToken) throw new AuthFailureError("Invalid Request!");
+  
+  // Remove "Bearer " prefix if present
+  const token = accessToken.startsWith('Bearer ') ? accessToken.slice(7) : accessToken;
+  
   try {
-    const decodeUser = JWT.verify(accessToken, keyStore.publicKey);
+    const decodeUser = JWT.verify(token, keyStore.publicKey);
     if (userId !== decodeUser.userId) {
       throw new AuthFailureError("Invalid Request!");
     }
     req.keyStore = keyStore;
+    req.user = decodeUser;
     console.log("check authentication success", keyStore);
     next();
   } catch (error) {
+    // Handle JWT verification errors
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError' || error.name === 'NotBeforeError') {
+      throw new AuthFailureError(error.message || "Invalid token!");
+    }
     throw error;
   }
 });

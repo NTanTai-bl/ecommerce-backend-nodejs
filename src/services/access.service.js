@@ -1,10 +1,11 @@
 const ShopModel = require("../models/shop.model");
+const JWT = require('jsonwebtoken')
 const bcrypt = require("bcrypt");
 const crypto = require("node:crypto");
 const KeyTokenService = require("./keyToken.service");
 const { createTokenPair } = require("../auth/authUtils");
 const { getInfoData } = require("../utils");
-const { BadRequestError, ConflictRequestError, AuthFailureError } = require("../core/error.response");
+const { BadRequestError, ConflictRequestError, AuthFailureError, ForbiddenError } = require("../core/error.response");
 const shopModel = require("../models/shop.model");
 const { findByEmail } = require("./shop.service");
 const RoleShop = {
@@ -130,5 +131,41 @@ class AccessService {
     const delKey = await KeyTokenService.removeKeyById(keyStore._id)
     return delKey
   }
+
+  static handleRefreshToken = async(refreshToken) => {
+    const foundToken =  await KeyTokenService.findByRefreshTokenUsed(refreshToken)
+    
+    if (foundToken){
+      // decode userId, email
+      const {userId} = await JWT.verify(refreshToken, foundToken.privateKey)
+      //delete token in keyStore
+      await KeyTokenService.deleteKeyById(userId)
+      throw new ForbiddenError('Something wrong, please login again!')
+    }
+
+    const holderToken =  await KeyTokenService.findByRefreshToken(refreshToken)
+    if(!holderToken) throw new AuthFailureError('Shop is not registered!')
+    
+    const {userId, email} = await JWT.verify(refreshToken, holderToken.privateKey)
+    const foundShop = await findByEmail({email})
+    if(!foundShop) throw new AuthFailureError('Shop is not registered!')
+    const tokens = await createTokenPair({userId, email}, holderToken.publicKey, holderToken.privateKey)
+
+    await holderToken.updateOne({
+      $set:{
+        refreshToken: tokens.refreshToken
+      },
+      $addToSet: {
+        refreshTokensUsed: refreshToken
+      }
+    })
+
+    return {
+      user: {userId, email},
+      tokens
+    }
+  }
+  
+
 }
 module.exports = AccessService;
