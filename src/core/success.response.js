@@ -1,7 +1,7 @@
 "use strict";
 const { StatusCodes, ReasonPhrases } = require("../utils/httpStatusCode");
 const reasonPhrases = require("../utils/reasonPhrases");
-class SuccessRespone {
+class SuccessResponse {
   constructor({
     message,
     statusCode = StatusCodes.OK,
@@ -18,13 +18,13 @@ class SuccessRespone {
   }
 }
 
-class OK extends SuccessRespone {
+class OK extends SuccessResponse {
   constructor({ message, metaData }) {
     super({ message, metaData });
   }
 }
 
-class CREATE extends SuccessRespone {
+class CREATE extends SuccessResponse {
   constructor({
     message,
     statusCode = StatusCodes.CREATED,
@@ -38,5 +38,5 @@ class CREATE extends SuccessRespone {
 module.exports = {
   OK,
   CREATE,
-  SuccessRespone,
+  SuccessResponse,
 };
